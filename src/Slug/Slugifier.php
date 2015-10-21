@@ -8,12 +8,15 @@ namespace Slug;
  */
 class Slugifier
 {
-    protected $delimiter = '-';
-    protected $limit;
-    protected $replacements = array();
-    protected $lowercase = true;
-    protected $transliterate = false;
-    protected $charMap = array(
+    //protected $delimiter = '-';
+    //protected $limit;
+    //protected $replacements = array();
+    //protected $lowercase = true;
+    //protected $transliterate = false;
+
+    protected static $hexaAccentMapping = '~&([a-z]{1,2})(acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i';
+
+    protected static $charMap = array(
         // Latin
         'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'AE', 'Ç' => 'C',
         'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I',
@@ -80,58 +83,42 @@ class Slugifier
         'š' => 's', 'ū' => 'u', 'ž' => 'z'
     );
 
-    public function setDelimiter($delimiter)
+    private static function hexaAccentCleaning($string)
     {
-        $this->delimiter = $delimiter;
+        return preg_replace(self::$hexaAccentMapping, '$1', htmlentities($string, ENT_QUOTES, 'UTF-8'));
     }
 
-    public function setReplacements(array $replacements)
-    {
-        $this->replacements = $replacements;
-    }
-
-    public function setLimit($limit)
-    {
-        $this->limit = $limit;
-    }
-
-    public function setLowercase($lowercase)
-    {
-        $this->lowercase = $lowercase;
-    }
-
-    public function setTransliterate($transliterate)
-    {
-        $this->transliterate = $transliterate;
-    }
-
-    public function slugify($string)
+    public static function slugify($string, $delimiter='-', $transliterate=False, $hexaAccentClean = False, $lowercase=True, $limit = NULL, $replacements = array())
     {
         // Make sure string is in UTF-8 and strip invalid UTF-8 characters
         $string = mb_convert_encoding((string) $string, 'UTF-8', mb_list_encodings());
 
         // Make custom replacements
-        $string = preg_replace(array_keys($this->replacements), $this->replacements, $string);
+        $string = preg_replace(array_keys($replacements), $replacements, $string);
 
         // Transliterate characters to ASCII
-        if ($this->transliterate) {
-            $string = str_replace(array_keys($this->charMap), $this->charMap, $string);
+        if ($transliterate) {
+            $string = str_replace(array_keys(self::$charMap), self::$charMap, $string);
         }
 
         // Replace non-alphanumeric characters with our delimiter
-        $string = preg_replace('/[^\p{L}\p{Nd}]+/u', $this->delimiter, $string);
+        $string = preg_replace('/[^\p{L}\p{Nd}]+/u', $delimiter, $string);
+
+        if ($hexaAccentClean) {
+            $string = self::hexaAccentCleaning($string);
+        }
 
         // Remove duplicate delimiters
-        $string = preg_replace('/(' . preg_quote($this->delimiter, '/') . '){2,}/', '$1', $string);
+        $string = preg_replace('/(' . preg_quote($delimiter, '/') . '){2,}/', '$1', $string);
 
         // Truncate slug to max. characters
-        if ($this->limit) {
-            $string = mb_substr($string, 0, $this->limit, 'UTF-8');
+        if ($limit) {
+            $string = mb_substr($string, 0, $limit, 'UTF-8');
         }
 
         // Remove delimiter from ends
-        $string = trim($string, $this->delimiter);
+        $string = trim($string, $delimiter);
 
-        return $this->lowercase ? mb_strtolower($string, 'UTF-8') : $string;
+        return $lowercase ? mb_strtolower($string, 'UTF-8') : $string;
     }
 }

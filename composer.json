@@ -1,14 +1,19 @@
 {
-    "name": "kevinlebrun/slug.php",
-    "description": "Slug helpers",
+    "name": "emirhg/slug.php",
+    "description": "Slug helpers. Forked from https://github.com/kevinlebrun/slug.php",
     "keywords": ["slug", "generate", "util", "helper"],
-    "homepage": "https://github.com/kevinlebrun/slug.php",
+    "homepage": "https://github.com/emirhg/slug.php",
     "type": "library",
     "authors": [
         {
             "name": "Kevin Le Brun",
             "email": "lebrun.k@gmail.com",
             "homepage": "http://kevinlebrun.fr",
+            "role": "developer"
+        },
+        {
+            "name": "Emir Herrera",
+            "email": "emir.herrera@gmail.com",
             "role": "developer"
         }
     ],
